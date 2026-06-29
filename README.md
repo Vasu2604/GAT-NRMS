@@ -1,7 +1,5 @@
 # GAT-NRMS: Graph Attention Network for Neural News Recommendation
 
-![GAT-NRMS Architecture](images/GAT-NRMS.png)
-
 **GAT-NRMS** (Graph Attention Network - Neural News Recommendation System) is an advanced deep learning model for personalized news recommendation. This project is built on top of the MIND (MIcrosoft News Dataset) Small dataset and leverages Graph Attention Networks (GAT) alongside Additive Attention mechanisms to learn highly accurate representations of both news articles and user preferences.
 
 ---
@@ -21,46 +19,30 @@ Traditional news recommendation systems often struggle to capture the complex, n
 
 Below is the human-made architecture flow illustrating how data propagates through the GAT-NRMS model:
 
-```mermaid
-flowchart TD
-    subgraph GAT-NRMS Architecture
-        direction TB
-        
-        subgraph News_Encoder [News Encoder]
-            direction TB
-            W[Words in News Title] --> WE[Word Embedding]
-            WE --> DO[Dropout]
-            DO --> GAT1[Graph Attention Layer]
-            GAT1 --> AA1[Additive Attention]
-            AA1 --> NV[News Vector]
-        end
-
-        subgraph User_Encoder [User Encoder]
-            direction TB
-            CN[Clicked News Vectors] --> GAT2[Graph Attention Layer]
-            GAT2 --> AA2[Additive Attention]
-            AA2 --> UV[User Vector]
-        end
-
-        subgraph Click_Predictor [Click Predictor]
-            direction LR
-            UV_in[User Vector] --> DP((Dot Product))
-            NV_in[Candidate News Vector] --> DP
-            DP --> Prob[Click Probability]
-        end
-        
-        UserHistory[User Click History] -->|Encode each news| News_Encoder
-        News_Encoder -->|Sequence of News Vectors| User_Encoder
-        User_Encoder --> UV_in
-        
-        CandidateNews[Candidate News] -->|Encode| News_Encoder
-        News_Encoder --> NV_in
-    end
-    
-    classDef encoder fill:#e1f5fe,stroke:#3182bd,stroke-width:2px;
-    classDef predictor fill:#fff3e0,stroke:#e65100,stroke-width:2px;
-    class News_Encoder,User_Encoder encoder;
-    class Click_Predictor predictor;
+```text
+┌────────────────────┐
+│ 1. Input Parsing   │ → Tokenizes candidate news and user click history
+└────────────────────┘
+          │
+          ▼
+┌────────────────────┐
+│ 2. News Encoder    │ → Applies Word Embedding, GAT, and Additive Attention
+└────────────────────┘
+          │
+          ▼
+┌────────────────────┐
+│ 3. User Encoder    │ → Processes clicked News Vectors via GAT and Additive Attention
+└────────────────────┘
+          │
+          ▼
+┌────────────────────┐
+│ 4. Click Predictor │ → Computes dot product of User Vector and Candidate News Vector
+└────────────────────┘
+          │
+          ▼
+┌────────────────────┐
+│ 5. Output          │ → Generates final click probability for recommendation
+└────────────────────┘
 ```
 
 ---
@@ -90,8 +72,6 @@ The model was evaluated on the MIND Small dataset using standard ranking metrics
 ---
 
 ## 📂 Repository Structure
-
-![Directory Structure](images/directory_structure.png)
 
 ```text
 .
