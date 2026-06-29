@@ -17,32 +17,47 @@ Traditional news recommendation systems often struggle to capture the complex, n
 
 ## 🧠 Architecture Flow
 
-Below is the human-made architecture flow illustrating how data propagates through the GAT-NRMS model:
+Below is the comprehensive deep-dive architecture flow illustrating how data propagates through the GAT-NRMS model layers and dimensions:
 
 ```text
-┌────────────────────┐
-│ 1. Input Parsing   │ → Tokenizes candidate news and user click history
-└────────────────────┘
-          │
-          ▼
-┌────────────────────┐
-│ 2. News Encoder    │ → Applies Word Embedding, GAT, and Additive Attention
-└────────────────────┘
-          │
-          ▼
-┌────────────────────┐
-│ 3. User Encoder    │ → Processes clicked News Vectors via GAT and Additive Attention
-└────────────────────┘
-          │
-          ▼
-┌────────────────────┐
-│ 4. Click Predictor │ → Computes dot product of User Vector and Candidate News Vector
-└────────────────────┘
-          │
-          ▼
-┌────────────────────┐
-│ 5. Output          │ → Generates final click probability for recommendation
-└────────────────────┘
+┌─────────────────────────────────────────────────────────────────┐
+│ 1. Input Parsing & Preprocessing                                │
+│  → News Title Tokenization (Max 20 words per title)             │
+│  → User History Extraction (Max 50 clicked articles per user)   │
+│  → Candidate Sampling (1 Positive : K Negative samples)         │
+└─────────────────────────────────────────────────────────────────┘
+                                 │
+                                 ▼
+┌─────────────────────────────────────────────────────────────────┐
+│ 2. News Encoder (Encodes both Clicked & Candidate News)         │
+│  → Word Embedding: GloVe 840B.300d maps tokens to 300d vectors  │
+│  → Dropout Layer: Applies regularization (p=0.2)                │
+│  → Graph Attention Layer (GAT): Models word-level relationships │
+│      - Treats words as nodes in a fully connected graph         │
+│      - Applies LeakyReLU and Softmax for attention weights      │
+│  → Additive Attention: Selects informative words                │
+│      - Uses 200d Query Vector to compute word importance        │
+│  [Output: 300-dimensional News Vector]                          │
+└─────────────────────────────────────────────────────────────────┘
+                                 │
+                                 ▼
+┌─────────────────────────────────────────────────────────────────┐
+│ 3. User Encoder (Models User Preferences)                       │
+│  → Input: Sequence of encoded Clicked News Vectors (up to 50)   │
+│  → Graph Attention Layer (GAT): Models news-level relationships │
+│      - Captures transitions between historically clicked news   │
+│  → Additive Attention: Selects informative news articles        │
+│      - Uses 200d Query Vector to compute article importance     │
+│  [Output: 300-dimensional User Vector]                          │
+└─────────────────────────────────────────────────────────────────┘
+                                 │
+                                 ▼
+┌─────────────────────────────────────────────────────────────────┐
+│ 4. Click Predictor (Scoring)                                    │
+│  → Input: User Vector (300d) & Candidate News Vector(s) (300d)  │
+│  → Operation: Dot Product (Batch Matrix Multiplication)         │
+│  [Output: Final Click Probability Score]                        │
+└─────────────────────────────────────────────────────────────────┘
 ```
 
 ---
